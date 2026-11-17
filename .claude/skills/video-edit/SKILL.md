@@ -29,7 +29,8 @@ Read brand.md and notes.md before any work. Read moves.md only if it has content
 ## Tools (this cloud setup is Linux)
 - ffmpeg (installed), Node + Playwright with Chromium (installed, do not reinstall).
 - Whisper: `faster-whisper` in Python, `word_timestamps=True`.
-- On a Mac instead: `brew install ffmpeg node`, `pip3 install mlx-whisper`, `npm install puppeteer`.
+- Pause cutting: `auto-editor` (`pip install auto-editor`). Check with `auto-editor --version`.
+- On a Mac instead: `brew install ffmpeg node`, `pip3 install mlx-whisper auto-editor`, `npm install puppeteer`.
 
 ## References (optional, skip if references/ is empty)
 - Prefer outliers: 5x that creator's usual views. Fewer than 5 videos is fine.
@@ -47,7 +48,9 @@ Stages in order: inputs confirmed, words timed, cut list shown, cut approved, st
 
 ## Workflow
 1. Whisper times every word. Save words.json.
-2. Cut pauses to 0.25s, only in true silence (check audio level, not just word gaps), and drop retakes. Keep every word whole. Show the cut list first and wait.
+2. Cut pauses to 0.25s, only in true silence, and drop retakes. Get the pause cuts from auto-editor, which checks the audio level, not just word gaps:
+   `auto-editor raw-take.mov --edit audio:threshold=4% --margin 0.125s --export v1 -o cuts.v1`
+   In cuts.v1, chunks with speed 99999 are the cuts (start and end are frames of the source). The margin keeps about 0.25s of each pause. Tune the threshold to the room noise. Find retakes from words.json by hand. Keep every word whole: no cut may fall inside a word in words.json. Show the cut list first and wait.
 3. Storyboard: one still per beat, from moves.md if it has content, otherwise from steps 4 to 7. Wait for a yes before any render.
 4. A new graphic every 2 seconds, top half, face below. Each one changes on its exact word.
 5. Each object slams in on its word and lands with no bounce (fast ease-out, no overshoot).
